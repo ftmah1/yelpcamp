@@ -30,7 +30,8 @@ var mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
 
 //connecting to app database
-mongoose.connect("mongodb://localhost/yelp_camp", {useMongoClient: true});
+//mongoose.connect("mongodb://localhost/yelp_camp", {useMongoClient: true});
+mongoose.connect("mongodb://tanwir:nic@ds133077.mlab.com:33077/yelpcamp");
 
 
 //Passport config
