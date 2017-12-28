@@ -10,7 +10,7 @@ var User = require("../models/user.js");
 
 //show sign up form
 router.get("/register", function(req, res) {
-    res.render("register");
+    res.render("register", {page:'register'});
 })
 
 //handle signup logic
@@ -20,7 +20,7 @@ router.post("/register",function(req, res) {
         if(err){
             console.log(err);
             req.flash("error", err.message);
-            return res.render("register");
+            return res.render("register", {error: err.message});
         }else{
             passport.authenticate("localStrategy")(req,res,function(){
                 req.flash("success", "Welcome to YelpCamp" + " " +user.username)
@@ -32,7 +32,7 @@ router.post("/register",function(req, res) {
 
 //show login form
 router.get("/login", function(req, res) {
-    res.render("login");
+    res.render("login", {page:"login"});
 })
 
 //handle login logic

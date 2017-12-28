@@ -30,7 +30,8 @@ var mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
 
 //connecting to app database
-mongoose.connect(process.env.DATABASEURL, {useMongoClient: true});
+var url = process.env.DATABASEURL || "mongodb://localhost/yelp_camp";
+mongoose.connect(url, {useMongoClient: true});
 //mongoose.connect("mongodb://tanwir:nic@ds133077.mlab.com:33077/yelpcamp");
 
 

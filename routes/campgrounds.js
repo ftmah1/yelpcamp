@@ -13,7 +13,7 @@ router.get("/", function(req,res){
             console.log(err);
         }else{
               //directs to campground listing page
-              res.render("campgrounds/index", {campGrounds: campgrounds});  
+              res.render("campgrounds/index", {campGrounds: campgrounds, page:"campgrounds"});  
         }
     })
     
