@@ -5,6 +5,7 @@ var mongoose = require("mongoose");
      name: String,
      price: String,
      image: String,
+     createdAt: {type: Date, default: Date.now},
      description: String,
      comments:[
          {

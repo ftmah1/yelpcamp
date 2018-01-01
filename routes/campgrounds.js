@@ -3,6 +3,7 @@ var router = express.Router();
 
 var Campground = require("../models/campground.js");
 var middleware = require("../middleware");
+var geocoder   = require("geocoder");
 
 
 //INDEX-Route displays all campground listings
@@ -36,6 +37,7 @@ router.post("/", middleware.isLoggedIn, function(req,res){
         id: req.user._id,
         username: req.user.username
     }
+    
     var newCampground = {name: name, price: price, image: image, description: description, author: author};
 
     // adding campground to app database
