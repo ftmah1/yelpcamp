@@ -5,20 +5,37 @@ var Campground = require("../models/campground.js");
 var middleware = require("../middleware");
 var geocoder   = require("geocoder");
 
+// Define escapeRegex function for search feature
+function escapeRegex(text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+};
 
 //INDEX-Route displays all campground listings
 router.get("/", function(req,res){
-    //retrieving all campgrounds from database
-    Campground.find({},function(err,campgrounds){
-        if(err){
-            console.log(err);
-        }else{
-              //directs to campground listing page
-              res.render("campgrounds/index", {campGrounds: campgrounds, page:"campgrounds"});  
-        }
-    })
+    if(req.query.search){
+        const regex = RegExp(escapeRegex(req.query.search), 'gi');
+        Campground.find({name: regex},function(err,campgrounds){
+            if(err){
+                console.log(err);
+            }else{
+                  //directs to campground listing page
+                  res.render("campgrounds/index", {campGrounds: campgrounds});  
+            }
+        });
+    }else{
+        //retrieving all campgrounds from database
+        Campground.find({},function(err,campgrounds){
+            if(err){
+                console.log(err);
+            }else{
+                  //directs to campground listing page
+                  res.render("campgrounds/index", {campGrounds: campgrounds, page:"campgrounds"});  
+            }
+        }) ;       
+    }
+
     
-})
+});
 
 //NEW-route displays form for creating a new route
 router.get("/new", middleware.isLoggedIn, function(req, res){
@@ -38,6 +55,9 @@ router.post("/", middleware.isLoggedIn, function(req,res){
         username: req.user.username
     }
     
+    geocoder.geocode(function (argument) {
+        // body...
+    })
     var newCampground = {name: name, price: price, image: image, description: description, author: author};
 
     // adding campground to app database
