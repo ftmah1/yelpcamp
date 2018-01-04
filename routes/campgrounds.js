@@ -1,9 +1,33 @@
 var express = require("express");
 var router = express.Router();
+var request = require("request");
+
 
 var Campground = require("../models/campground.js");
 var middleware = require("../middleware");
 var geocoder   = require("geocoder");
+
+var multer = require('multer');
+var storage = multer.diskStorage({
+  filename: function(req, file, callback) {
+    callback(null, Date.now() + file.originalname);
+  }
+});
+var imageFilter = function (req, file, cb) {
+    // accept image files only
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
+        return cb(new Error('Only image files are allowed!'), false);
+    }
+    cb(null, true);
+};
+var upload = multer({ storage: storage, fileFilter: imageFilter})
+
+var cloudinary = require('cloudinary');
+cloudinary.config({ 
+  cloud_name: 'dzo2txjkn', 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 // Define escapeRegex function for search feature
 function escapeRegex(text) {
@@ -44,35 +68,24 @@ router.get("/new", middleware.isLoggedIn, function(req, res){
 })
 
 //CREATE-route adds a new campground to database
-router.post("/", middleware.isLoggedIn, function(req,res){
-     //get data from form and add it to campground
-    var name = req.body.name;
-    var image = req.body.image;
-    var price = req.body.price;
-    var description = req.body.description;
-    var author = {
+router.post("/", middleware.isLoggedIn, upload.single('image'), function(req, res) {
+    cloudinary.uploader.upload(req.file.path, function(result) {
+      // add cloudinary url for the image to the campground object under image property
+      req.body.campground.image = result.secure_url;
+      // add author to campground
+      req.body.campground.author = {
         id: req.user._id,
         username: req.user.username
-    }
-    
-    geocoder.geocode(function (argument) {
-        // body...
-    })
-    var newCampground = {name: name, price: price, image: image, description: description, author: author};
-
-    // adding campground to app database
-    Campground.create(newCampground,function(err, campground){
-        if(err){
-            console.log(err);
-            req.flash("error", err.message);
-        }else{
-               //redirect to campgrounds page
-                req.flash("success", "Successfully added Campground");
-                res.redirect("/campgrounds");
-        }    
-    })
-    
-})
+      }
+      Campground.create(req.body.campground, function(err, campground) {
+        if (err) {
+          req.flash('error', err.message);
+          return res.redirect('back');
+        }
+        res.redirect('/campgrounds/' + campground.id);
+      });
+    });
+});
 
 //SHOW-route displays info about one campground
 router.get("/:id", function(req,res){
